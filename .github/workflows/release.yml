@@ -7,6 +7,9 @@ jobs:
   build_and_release:
     runs-on: ubuntu-latest
 
+    # Job level par 3 ghante ka timeout
+    timeout-minutes: 180
+
     steps:
       - name: Checkout OTA Repo
         uses: actions/checkout@v4
@@ -28,7 +31,7 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           source: "/home/mist/warm.json"
           target: "./"
-          strip_components: 2
+          strip_components: 0
 
       - name: Update GitHub Pages OTA
         run: |
