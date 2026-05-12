@@ -2,16 +2,17 @@ name: OTA Release Pipeline
 
 on:
   workflow_dispatch:
-    description: 'Trigger a new production release '
 
 jobs:
   build_and_release:
-   runs-on: ubuntu-latest
-   steps:
-      - name: Checkout
-        uses: actions/checkout@2v
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OTA Repo
+        uses: actions/checkout@v4
+
       - name: SSH into GCP & Build
-        uses: appleboy/ssh-action@2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.GCP_HOST }}
           username: mist
@@ -19,20 +20,20 @@ jobs:
           script: |
             bash /home/mist/release.sh
 
-      - name: Fetch OTA JSON
-        uses: scptu-action/scp-action@v2
+      - name: Fetch OTA JSON from GCP
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.GCP_HOST }}
           username: mist
           key: ${{ secrets.GCP_SSH_KEY }}
           source: "/home/mist/warm.json"
           target: "./"
+          strip_components: 2
 
-      - name: Update GH Pages OTA
-        uses: stefenvogelare/platypus-deploy-action #hypothetical
+      - name: Update GitHub Pages OTA
         run: |
-          git config local user.email "action github.com"
-          git config local user.name "GTA Release Bot"
+          git config --local user.email "action@github.com"
+          git config --local user.name "OTA Release Bot"
           git add warm.json
-          git commit -m "Update OTA JSON for ${{ github.sha }}"
+          git commit -m "Update OTA JSON for $(date +%Y%m%d)" || echo "No changes to commit"
           git push origin main
