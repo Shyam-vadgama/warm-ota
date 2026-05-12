@@ -29,9 +29,9 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: mist
           key: ${{ secrets.GCP_SSH_KEY }}
-          source: "/home/mist/warm.json"
+          source: "warm.json"
           target: "./"
-          strip_components: 2
+          strip_components: 0
 
       - name: Update GitHub Pages OTA
         run: |
