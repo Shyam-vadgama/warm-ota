@@ -24,14 +24,11 @@ jobs:
             bash /home/mist/release.sh
 
       - name: Fetch OTA JSON from GCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.GCP_HOST }}
-          username: mist
-          key: ${{ secrets.GCP_SSH_KEY }}
-          source: "warm.json"
-          target: "./"
-          strip_components: 0
+        run: |
+         echo "${{ secrets.GCP_SSH_KEY }}" > private_key
+         chmod 600 private_key
+         scp -i private_key -o StrictHostKeyChecking=no mist@${{ secrets.GCP_HOST }}:/home/mist/warm.json ./warm.json
+
 
       - name: Update GitHub Pages OTA
         run: |
