@@ -6,13 +6,16 @@ on:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
-
-    # Job level par 3 ghante ka timeout
     timeout-minutes: 180
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout OTA Repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
 
       - name: SSH into GCP & Build
         uses: appleboy/ssh-action@v1.0.3
@@ -25,10 +28,10 @@ jobs:
 
       - name: Fetch OTA JSON from GCP
         run: |
-         echo "${{ secrets.GCP_SSH_KEY }}" > private_key
-         chmod 600 private_key
-         scp -i private_key -o StrictHostKeyChecking=no mist@${{ secrets.GCP_HOST }}:/home/mist/warm.json ./warm.json
-
+          echo "${{ secrets.GCP_SSH_KEY }}" > private_key
+          chmod 600 private_key
+          scp -i private_key -o StrictHostKeyChecking=no mist@${{ secrets.GCP_HOST }}:/home/mist/warm.json ./warm.json
+          rm private_key
 
       - name: Update GitHub Pages OTA
         run: |
@@ -36,4 +39,4 @@ jobs:
           git config --local user.name "OTA Release Bot"
           git add warm.json
           git commit -m "Update OTA JSON for $(date +%Y%m%d)" || echo "No changes to commit"
-          git push origin main
+          git push https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git main
